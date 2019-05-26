@@ -11,6 +11,7 @@ enum PackingType {
     SC,
     BCC,
     FCC,
+    NoCrystal
 };
 
 class CrystalSimulator {

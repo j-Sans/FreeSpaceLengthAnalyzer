@@ -5,6 +5,10 @@
 CrystalSimulator::CrystalSimulator(int numParticles, double volumeConcentration, PackingType packing) {
     this->volumeConcentration = volumeConcentration;
     this->packing = packing;
+
+    if (packing == NoCrystal) {
+        throw std::logic_error("CrystalSimulator initialied with packing of NoCrystal");
+    }
     
     double temp = pow(numParticles / (packing == FCC ? 4.0 : packing == BCC ? 2.0 : 1.0), 1.0 / 3.0);
     latticeSitesPerRow = (int)(temp + 0.001); // For an unknown reason temp became 6 but when it was cast to an int, became 5. Adding a small decimal makes it large enough that casting does not decrement it.
