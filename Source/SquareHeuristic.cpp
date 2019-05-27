@@ -173,9 +173,9 @@ double SquareHeuristic::heuristic(const std::vector<Point>& circles, double radi
     }
     
     if ((int)(squareLength / boxLengthDecrement) >= (int)(startingLength / boxLengthDecrement)) {
-         if (squareLength > boxSize) return boxSize;
-         std::cout << "Starting length too small. Trying length " << startingLength * 2.0 << std::endl;
-         return heuristic(circles, radius, boxSize, square, boxLengthDecrement, numTests, startingLength * 2.0);
+        if (squareLength > boxSize) return boxSize;
+        std::cout << "Starting length too small. Trying length " << startingLength * 2.0 << std::endl;
+        return heuristic(circles, radius, boxSize, square, boxLengthDecrement, numTests, startingLength * 2.0);
     }
    
     return squareLength;
@@ -237,6 +237,7 @@ bool SquareHeuristic::isContained(const Point& circle, double radius, Point squa
 }
 
 std::vector<Point> SquareHeuristic::getCircles(const std::string& filename) {
+    // std::cout << "file: " << filename << std::endl;
     std::ifstream input;
     input.open(filename);
     
@@ -262,7 +263,7 @@ std::vector<Point> SquareHeuristic::getCircles(const std::string& filename) {
     for (int a = 0; a < numCircles; a++) {
         input.getline(buffer, BUFFER_SIZE);
         str = std::string(buffer); // Get each line as a new string
-        
+        // std::cout << str << std::endl;
         // Extract the number of circles and their radii
         commaPos = str.find_first_of(SEPARATING_CHARACTER);
         double x = std::stod(str.substr(0, commaPos));

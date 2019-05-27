@@ -10,74 +10,81 @@
 
 // #define PACKING_TYPE SC
 // #define ITERATE_THROUGH_FILES
-#define MAX_DEPTH 10
+// #define MAX_DEPTH 10
 // #define TEM_IMAGE
 
 #define BUFFER_SIZE 256
 
-struct malformed_command : public std::exception{};
+struct malformed_command : public std::runtime_error {
+public:
+    malformed_command(std::string str) : std::runtime_error(str) {}
+};
 
 std::string help =
-    (std::string)"This program calculates the free space length of a 2D image of particle locations. The program can analyze files of particle locations (-f), or it can simulate and analyze slices of a crystalline lattice of particles (--SC, --BCC, --FCC), or it can parse and analyze a simulation of nanoparticles in 3D (-s).\n" +
+    (std::string)"This program calculates the free space length of a 2D image of particle\n\tlocations. The program can analyze files of particle locations (-f), or it can\n\tsimulate and analyze slices of a crystalline lattice of particles (--SC, --BCC,\n\t--FCC), or it can parse and analyze a simulation of nanoparticles in 3D (-s).\n" +
     (std::string)"Expected: ./SquareCalculator [flags]\n" +
-    (std::string)"flags:\n" +
-    (std::string)"-f      sets the FILE to be analyzed. Must be followed by a string representing valid filepath. This flag cannot be set with a crystal lattice flag or with the -s flag.\n" +
-    (std::string)"--SC    indicates that a SIMPLE CUBIC lattice should be created and analyzed. This flag cannot be set with -f or -s.\n" +
-    (std::string)"--BCC   indicates that a BODY CENTERED CUBIC lattice should be created and analyzed. This flag cannot be set with -f or -s.\n" +
-    (std::string)"--FCC   indicates that a FACE CENTERED CUBIC lattice should be created and analyzed. This flag cannot be set with -f or -s.\n" +
-    (std::string)"-d      sets the DEPTH. Must be followed by a positive int. Note that it has no effect if the -f flag is also set.\n" +
-    (std::string)"-m      sets the MAX DEPTH and automatically indicates that all depths up to the max depth should be analyzed. Must be followed by a positive int. Note that it has no effect if the -f flag is also set.\n" +
-    (std::string)"-v      sets the VOLUME FRACTION. Must be followed by a positive double. Note that it has no effect if no lattice flag has been set.\n" +
-    (std::string)"-i      indicates that the program should cut slices of every depth up to the max depth from the set depth or 1, if no depth was set. The program will ITERATE through each depth. Note that it has no effect if the -f flag is also set.\n" +
-    (std::string)"-a      indicates that ALL circle files that are created or parsed will be analyzed. Note that it has no effect if the -f flag is also set.\n" +
-    (std::string)"-s      indicates that a movie_0.xyz file from a SIMULATOR should be parsed and analyzed. This flag cannot be set with a crystal lattice flag or with the -f flag.\n" +
-    (std::string)"help    You seemed to have figured this one out already : )";
+    (std::string)"General flags:\n" +
+    (std::string)"-f    * Sets the FILE to be analyzed. Must be followed by a string representing\n\tvalid filepath. This flag cannot be set with a crystal lattice flag or with the\n\t-s flag.\n" +
+    (std::string)"-l    * Sets the LENGTH DECREMENT by which a length will be decremented each\n\titeration. A smaller numbers will get a more precise result but take longer. The\n\tdefault is 0.01. The final result will only be accurate based on the length\n\tdecrement\n" +
+    (std::string)"help  * You seemed to have figured this one out already..." +
+    (std::string)"Crystal lattice and simulator flags:" +
+    (std::string)"--sc * Indicates that a SIMPLE CUBIC lattice should be created and analyzed.\n\tThis flagcannot be set with -f or -s.\n" +
+    (std::string)"--bcc * Indicates that a BODY CENTERED CUBIC lattice should be created and\n\tanalyzed.This flag cannot be set with -f or -s.\n" +
+    (std::string)"--fcc * Indicates that a FACE CENTERED CUBIC lattice should be created and\n\tanalyzed.This flag cannot be set with -f or -s.\n" +
+    (std::string)"-v    * Sets the VOLUME FRACTION. Must be followed by a positive double. Note\n\tthat it has no effect if no lattice flag has been set.\n" +
+    (std::string)"-d    * Sets the DEPTH. Must be followed by a positive int. Note that it has no\n\teffect if the -f flag is also set.\n" +
+    (std::string)"-m    * Sets the MAX DEPTH and automatically indicates that all depths up to the\n\tmaxdepth should be analyzed. Must be followed by a positive int. Note that it\n\thas no effect if the -f flag is also set.\n" +
+    (std::string)"-i    * Indicates that the program ITERATE through all depths by cutting slices\n\tof every depth up to the max depth from the set depth or 1, if no depth was set.\n\tThen it will analyze at each depth. Note that it has no effect if the -f flag is\n\talso set.\n" +
+    (std::string)"-a    * Indicates that ALL circle files that are created or parsed will be\n\tanalyzed. Note that it has no effect if the -f flag is also set.\n" +
+    (std::string)"-s    * Indicates that a movie_0.xyz file from a SIMULATOR should be parsed and\n\tanalyzed. There must be a movie_0.xyz file in the directory. This flag cannot be\n\tset with a crystal lattice flag or with the -f flag.\n";
 
-std::vector<std::string> makeCircleFiles(PackingType p, double volumeFraction);
-std::vector<std::string> parse (int framesToIgnore, int framesToRecord, bool doSquares, int* depth, double* volumeFraction);
+void run(int argc, char const* argv[]);
+std::vector<std::string> makeCircleFiles(PackingType p, double volumeFraction, int* maxDepth);
+std::vector<std::string> parse (int framesToIgnore, int framesToRecord, int* depth, double* volumeFraction, int* maxDepth);
 void processCircles(const std::string& circleFilename, double squareLengthDecrement, double volumeFraction, int depth);
 
 void readInput(int* framesToIgnore, int* framesToRecord, int* depth, double* squareLengthDecrement);
 std::string writeOutput(std::string squareFilename, double areaFraction, double volumeFraction, int depth, std::string outputFilename = "output.txt");
 
 int main(int argc, char const* argv[]) {
+    std::cout << std::endl;
+    try {
+        run(argc, argv);
+    } catch (malformed_command e) {
+        std::cout << e.what() << std::endl;
+    }
+    return 0;
+}
+
+void run(int argc, char const* argv[]) {
     // bool TEM = false;
     PackingType packing = NoCrystal;
     bool iterateThroughFiles = false;
     bool iterateThroughDepths = false;
     bool analyzeSimulation = false;
 
-    int framesToIgnore, framesToRecord, depth = 1, maxDepth = MAX_DEPTH;
-    double volumeFraction = -1.0, squareLengthDecrement;
+    // -1 will indicate later if it was not changed
+    int framesToIgnore, framesToRecord, depth = -1, maxDepth = std::numeric_limits<int>::max();
+    double volumeFraction = -1.0, squareLengthDecrement = 0.01;
 
     std::string inputtedFilename = "";
 
-    for (int a = 0; a < argc; a++) {
+    for (int a = 1; a < argc; a++) {
         std::string arg = std::string(argv[a]);
-        /*if (arg == "--TEM") {
-            TEM = true;
-            setModeFlag(&modeFlag);
-            std::cout << "Analyzing TEM image file" << std::endl;
-        } else*/ if (arg == "--SC") {
+        // Convert the arg to lower case
+        for (int b = 0; b < arg.size(); b++) {
+            if (arg[b] >= 'A' && arg[b] <= 'Z') {
+                arg[b] = (char)(arg[b] - 'A' + 'a');
+            }
+        }
+        if (arg == "--sc") {
             packing = SC;
-            if (packing != NoCrystal) {
-                std::cout << "Cannot analyze a crystal lattice if -f has been set." << std::endl;
-                exit(EXIT_FAILURE);
-            }
             std::cout << "Analyzing simple cubic" << std::endl;
-        } else if (arg == "--BCC") {
+        } else if (arg == "--bcc") {
             packing = BCC;
-            if (packing != NoCrystal) {
-                std::cout << "Cannot analyze a crystal lattice if -f has been set." << std::endl;
-                exit(EXIT_FAILURE);
-            }
             std::cout << "Analyzing body centered cubic" << std::endl;
-        } else if (arg == "--FCC") {
+        } else if (arg == "--fcc") {
             packing = FCC;
-            if (packing != NoCrystal) {
-                std::cout << "Cannot analyze a crystal lattice if -f has been set." << std::endl;
-                exit(EXIT_FAILURE);
-            }
             std::cout << "Analyzing face centered cubic" << std::endl;
         } else if (arg == "-d") {
             a += 1;
@@ -86,14 +93,12 @@ int main(int argc, char const* argv[]) {
                 try {
                     depth = std::stoi(argv[a]);
                     std::cout << "depth set to " << depth << std::endl <<
-                                 "Note that this will be overriden by the input from the settings file if analyzing a non-TEM non-crystal file." << std::endl;
+                                 "Note that this will be overriden by the input from the settings file if parsing a simulation." << std::endl;
                 } catch (std::invalid_argument e) {
-                    std::cout << err << std::endl;
-                    exit(EXIT_FAILURE);
+                    throw malformed_command(err);
                 }
             } else {
-                std::cout << err << std::endl;
-                exit(EXIT_FAILURE);
+                throw malformed_command(err);
             }
         } else if (arg == "-m") {
             a += 1;
@@ -105,12 +110,10 @@ int main(int argc, char const* argv[]) {
                     std::cout << "max depth to analyze set to " << depth << std::endl <<
                                  "Iterating through depths set" << std::endl;
                 } catch (std::invalid_argument e) {
-                    std::cout << err << std::endl;
-                    exit(EXIT_FAILURE);
+                    throw malformed_command(err);
                 }
             } else {
-                std::cout << err << std::endl;
-                exit(EXIT_FAILURE);
+                throw malformed_command(err);
             }
         } else if (arg == "-v") {
             a += 1;
@@ -123,12 +126,23 @@ int main(int argc, char const* argv[]) {
                     volumeFraction = std::stod(argv[a]);
                     std::cout << "volume fraction set to " << volumeFraction << std::endl;
                 } catch (std::invalid_argument e) {
-                    std::cout << err << std::endl;
-                    exit(EXIT_FAILURE);
+                    throw malformed_command(err);
                 }
             } else {
-                std::cout << err << std::endl;
-                exit(EXIT_FAILURE);
+                throw malformed_command(err);
+            }
+        } else if (arg == "-l") {
+            a += 1;
+            std::string err = "The -l flag must be followed by a double representing the length decrement per iteration.";
+            if (a < argc) {
+                try {
+                    squareLengthDecrement = std::stod(argv[a]);
+                    std::cout << "Length decrement set to " << squareLengthDecrement << std::endl;
+                } catch (std::invalid_argument e) {
+                    throw malformed_command(err);
+                }
+            } else {
+                throw malformed_command(err);
             }
         } else if (arg == "-i") {
             std::cout << "Iterating through depths set" << std::endl;
@@ -141,53 +155,61 @@ int main(int argc, char const* argv[]) {
             std::string err = "The -f flag must be followed by a string representing the crcl filename.\n";
             if (a < argc) {
                 if (packing != NoCrystal) {
-                    std::cout << "Cannot use a chosen file with the specified packing type." << std::endl;
-                    exit(EXIT_FAILURE);
+                    throw malformed_command("Cannot use a chosen file with the specified packing type.");
                 }
                 inputtedFilename = argv[a];
                 std::cout << "File to analyze set to " << inputtedFilename << std::endl;
             } else {
-                std::cout << err << std::endl;
-                exit(EXIT_FAILURE);
+                throw malformed_command(err);
             }
         } else if (arg == "-s") {
-            std::cout << "Analyzing simulation file \"movie_0.xyz\"" << std::endl;
+            std::cout << "Parsing, slicing, and analzing 3D simulation file \"movie_0.xyz\"" << std::endl;
+            if (packing != NoCrystal) {
+                throw malformed_command("Cannot use simulator with specified packing type.");
+            } else if (inputtedFilename != "") {
+                throw malformed_command("Cannot use simulator with a specified file.");
+            }
             analyzeSimulation = true;
-        } else if (arg == "help") {
+        } else if (arg == "HELP") {
             std::cout << help << std::endl;
-            exit(EXIT_SUCCESS);
+            return;
+        } else {
+            std::cout << "Unknown argument " << a << ": " << arg << std::endl;
         }
     }
 
+    // Catch all malformed commands that had an incorrect combination of flags
     if (packing == NoCrystal && !analyzeSimulation && inputtedFilename == "") {
-        std::cout << "No action specified. Use -f, -s, or a crystal packing flag (--SC, --BCC, --FCC) to indicate what to do." << std::endl << help << std::endl;
-        exit(EXIT_FAILURE);
+        std::cout << help << std::endl << std::endl;
+        throw malformed_command("No action specified. Use -f, -s, or a crystal packing flag (--SC, --BCC, --FCC) to indicate what to do.");
+    } else if (packing != NoCrystal && (volumeFraction <= 0 || volumeFraction >= 1)) {
+        throw malformed_command("Invalid volumeFraction. Must be set using the -v flag to a number between 0 and 1.");
     }
     
     if (analyzeSimulation) {
-        std::cout << "No inputted file and no crystal structure specified.\n" <<
-                     "Analyzing movie_0.xyz file using the specifications in the \"calcinput\".";
+        std::cout << "Analyzing movie_0.xyz file using the specifications in the \"calcinput\".\n";
         readInput(&framesToIgnore, &framesToRecord, &depth, &squareLengthDecrement);
     }
 
-    maxDepth = iterateThroughDepths ? maxDepth : depth; /* maxDepth is MAX_DEPTH by default */
-
+    depth = depth != -1 ? depth : iterateThroughDepths && inputtedFilename == "" ? 1 : 3; // Depth defaults to 1 if iterating through all depths, otherwise to 3
+    maxDepth = iterateThroughDepths && inputtedFilename == "" ? maxDepth : depth; // maxDepth is the max int by default
+    
+    // If not already set, maxDepth is set to the largest that fits in the box in makeCircleFiles(...) or parse(...)
     for (/* depth is already initialized. 1 by default */; depth <= maxDepth; depth++) {
         std::vector<std::string> circleFilenames;
         int index = 0;
-        int prevDepth = depth;
+        // int prevDepth = depth;
         if (inputtedFilename != "") {
             circleFilenames.push_back(inputtedFilename);
         } else if (packing != NoCrystal) {
-            if (volumeFraction < 0) {
-                std::cout << "Invalid volumeFraction. Must be set with the -v flag to a positive number." << std::endl;
-            }
-            circleFilenames = makeCircleFiles(packing, volumeFraction);
+            circleFilenames = makeCircleFiles(packing, volumeFraction, &maxDepth);
+            std::cout << "\nDepth: " << depth << std::endl;
+            std::cout << "Square length decrement (per iteration): " << squareLengthDecrement << std::endl;
         } else {
-            circleFilenames = parse(framesToIgnore, framesToRecord, &depth, &volumeFraction);
-
-            std::cout << std::endl << "Frames to ignore: " << framesToIgnore << std::endl;
+            circleFilenames = parse(framesToIgnore, framesToRecord, &depth, &volumeFraction, &maxDepth);
+            std::cout << "\nFrames to ignore: " << framesToIgnore << std::endl;
             std::cout << "Frames to record: " << framesToRecord << std::endl;
+            std::cout << "Depth: " << depth << std::endl;
             std::cout << "Square length decrement (per iteration): " << squareLengthDecrement << std::endl;
         }
 
@@ -198,30 +220,37 @@ int main(int argc, char const* argv[]) {
             
             index++;
         } while (iterateThroughFiles && circleFilenames[index] != circleFilenames.back());
-        if (prevDepth != depth) break; // The parser changes depth only if the depth is the max box size. In that case, no need to keep iterating through depths.
+        // if (prevDepth != depth) break; // The parser changes depth only if the depth is the max box size. In that case, no need to keep iterating through depths.
     }
-
-    return 0;
 }
 
-std::vector<std::string> makeCircleFiles(PackingType p, double volumeFraction) {
+std::vector<std::string> makeCircleFiles(PackingType p, double volumeFraction, int* maxDepth) {
     std::cout << std::endl << "Initializing CrystalSimulator" << std::endl;
 
+    // std::cout << "p: " << p << std::endl;
+
     int numParticles = p == FCC ? 500 : p == BCC ? 432 : 512;
+
+    // std::cout << "numParticles: " << numParticles << std::endl;
     
     CrystalSimulator crystalSimulator(numParticles, volumeFraction, p);
     std::vector<std::string> circleFilenames = { crystalSimulator.printLattice() };
     std::cout << circleFilenames.size() << " circle files" << std::endl;
+
+    *maxDepth = std::min(*maxDepth, (int)crystalSimulator.getSideLength());
+
     return circleFilenames;
 }
 
-std::vector<std::string> parse(int framesToIgnore, int framesToRecord, int* depth, double* volumeFraction) {
+std::vector<std::string> parse(int framesToIgnore, int framesToRecord, int* depth, double* volumeFraction, int* maxDepth) {
     std::cout << std::endl << "Initializing parser" << std::endl;
 
     std::cout << "Depth per layer: " << *depth << std::endl;
     Parser parser("movie_0.xyz", framesToIgnore, framesToRecord, depth);
     
     *volumeFraction = parser.getVolumeFraction();
+
+    *maxDepth = std::min(*maxDepth, (int)parser.getBoxSize());
     
     std::cout << "Parsing" << std::endl;
 
@@ -240,10 +269,11 @@ void processCircles(const std::string& circleFilename, double squareLengthDecrem
     
     std::cout << "Solving for square size" << std::endl;
     
-    Visualizer visualizer(circleFilename, "squares.txt");
+    Visualizer visualizer(circleFilename, "");
     visualizer.saveImage();
     
     squareFilename = algorithm.outputSquares(squareLengthDecrement, 1, 20000, (pow(10.0, -0.399) * pow(visualizer.getAreaFraction(), -0.650)) * 1.25);
+    // squareFilename = algorithm.outputSquares(squareLengthDecrement, 1, 20000, visualizer.getAreaFraction() * 2.0);
     
     std::cout << std::endl << "Area fraction: " << visualizer.getAreaFraction() << std::endl; 
     std::string outputFilename = writeOutput(squareFilename, visualizer.getAreaFraction(), volumeFraction, depth);

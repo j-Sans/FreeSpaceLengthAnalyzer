@@ -19,6 +19,7 @@ public:
     CrystalSimulator(int numParticles, double volumeConcentration, PackingType packing);
     
     std::string printLattice(std::string filename = "");
+    double getSideLength();
     
 private:
     double sideLength;

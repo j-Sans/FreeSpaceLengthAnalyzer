@@ -16,7 +16,9 @@ CrystalSimulator::CrystalSimulator(int numParticles, double volumeConcentration,
     sideLength = 0.5 * pow(4.0 / 3.0 * (double)numParticles * PI / (double)volumeConcentration, 1.0 / 3.0);
     
     spaceBetweenLattices = sideLength / (double)latticeSitesPerRow;
-    std::cout << "Initialized CrystalSimulator with values:\n\tVolume concentration: " << volumeConcentration << "\n\tLattice sites per row: " << latticeSitesPerRow << "\n\tBox side length: " << sideLength << "\n\tSpace between lattice sites: " << spaceBetweenLattices << std::endl;
+    // std::cout << "Initialized CrystalSimulator with values:\n\tVolume concentration: " << volumeConcentration << "\n\tLattice sites per row: " << latticeSitesPerRow << "\n\tBox side length: " << sideLength << "\n\tSpace between lattice sites: " << spaceBetweenLattices << std::endl;
+
+    this->numParticles = 0;
 }
 
 // Public
@@ -28,7 +30,9 @@ std::string CrystalSimulator::printLattice(std::string filename) {
     std::ofstream file;
 
     filename = filename != "" ? filename : packing == FCC ? "FCC.crcl" : packing == BCC ? "BCC.crcl" : "SC.crcl";
+    std::cout << "Outputting file " << filename << std::endl;
     file.open(filename);
+    std::cout << "Num particles: " << numParticles << ", side length: " << sideLength << ", volume concentration: " << volumeConcentration << std::endl;
     std::string str = std::to_string(numParticles) + " 1.0 " + std::to_string(sideLength) + " " + std::to_string(volumeConcentration) + "\n";
     file.write(str.c_str(), str.length());
     
@@ -38,6 +42,10 @@ std::string CrystalSimulator::printLattice(std::string filename) {
     }
     
     return filename;
+}
+
+double CrystalSimulator::getSideLength() {
+    return sideLength;
 }
 
 // Private

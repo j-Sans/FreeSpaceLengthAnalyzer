@@ -78,7 +78,7 @@ double SquareHeuristic::heuristic(const std::vector<Point>& circles, double boxS
 	modeOutput.close();
 	int recordBox = startingLength / boxLengthDecrement;
 	double squareLength = startingLength;
-	std::cout << "Starting with square length " << startingLength << std::endl;
+	std::cout << " square length " << startingLength << std::endl;
 	for (; squareLength > 0; squareLength -= boxLengthDecrement) {
 		std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
 		if ((int)((std::chrono::duration<double>)(now - prevTime)).count() > UPDATE_SECONDS) {

@@ -26,7 +26,7 @@ Parser::Parser(std::string filename, int framesToIgnore, int framesToRecord, int
 	std::cout << "Number of particles: " << numParticles << std::endl;
 	file.get(buffer, 256, ' ');
 	boxSize = std::stod(buffer);
-	std::cout << "Box side length: " << boxSize << std::endl << "Box volume: " << (boxSize * boxSize * boxSize) << std::endl;
+	std::cout << " length: " << boxSize << std::endl << "Box volume: " << (boxSize * boxSize * boxSize) << std::endl;
 	file.get(buffer, 256);
 	diameter = std::stod(buffer);
 	volumeFraction = (numParticles * 4.0 / 3.0 * pi * (diameter / 2.0) * (diameter / 2.0) * (diameter / 2.0) / boxSize / boxSize / boxSize);
