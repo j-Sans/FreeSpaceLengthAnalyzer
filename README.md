@@ -30,10 +30,13 @@ $ ./SquareCalculator [flags]
 * __`-s`__      indicates that a movie_0.xyz file from a SIMULATOR should be parsed and analyzed. There must be a movie_0.xyz file in the directory. This flag cannot be set with a crystal lattice flag or with the -f flag.
 
 ## Current Status
-Please note: this README is incomplete. The program needs more testing and this readme needs to be expanded. These are some of the update plans
+Please note: this README is incomplete. The program needs more testing and this readme needs to be expanded. These are some of the update plans.
+
+Currently, the focus has been on `/Source/`. The other folders can be ignored.
 * Complete testing of the program for TEM imagery
 * Add brief description of how to compile it with make
 * Add example files to demonstrate the program into the directory
 * Add explanation of file format to README
 * Add explanation of movie files to README and link to Kai's work (with permission). Also add calcinput and makecalcinput for when running the program with -s.
 * Add examples to the README
+* Figure out about running the visualizer...
