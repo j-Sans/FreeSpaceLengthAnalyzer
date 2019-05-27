@@ -26,8 +26,8 @@ std::string help =
     (std::string)"General flags:\n" +
     (std::string)"-f    * Sets the FILE to be analyzed. Must be followed by a string representing\n\tvalid filepath. This flag cannot be set with a crystal lattice flag or with the\n\t-s flag.\n" +
     (std::string)"-l    * Sets the LENGTH DECREMENT by which a length will be decremented each\n\titeration. A smaller numbers will get a more precise result but take longer. The\n\tdefault is 0.01. The final result will only be accurate based on the length\n\tdecrement\n" +
-    (std::string)"help  * You seemed to have figured this one out already..." +
-    (std::string)"Crystal lattice and simulator flags:" +
+    (std::string)"help  * You seemed to have figured this one out already...\n" +
+    (std::string)"Crystal lattice and simulator flags:\n" +
     (std::string)"--sc * Indicates that a SIMPLE CUBIC lattice should be created and analyzed.\n\tThis flagcannot be set with -f or -s.\n" +
     (std::string)"--bcc * Indicates that a BODY CENTERED CUBIC lattice should be created and\n\tanalyzed.This flag cannot be set with -f or -s.\n" +
     (std::string)"--fcc * Indicates that a FACE CENTERED CUBIC lattice should be created and\n\tanalyzed.This flag cannot be set with -f or -s.\n" +
@@ -191,7 +191,7 @@ void run(int argc, char const* argv[]) {
         readInput(&framesToIgnore, &framesToRecord, &depth, &squareLengthDecrement);
     }
 
-    depth = depth != -1 ? depth : iterateThroughDepths && inputtedFilename == "" ? 1 : 3; // Depth defaults to 1 if iterating through all depths, otherwise to 3
+    depth = inputtedFilename != "" ? -1 : depth != -1 ? depth : iterateThroughDepths ? 1 : 3; // Depth defaults to 1 if iterating through all depths, otherwise to 3
     maxDepth = iterateThroughDepths && inputtedFilename == "" ? maxDepth : depth; // maxDepth is the max int by default
     
     // If not already set, maxDepth is set to the largest that fits in the box in makeCircleFiles(...) or parse(...)
