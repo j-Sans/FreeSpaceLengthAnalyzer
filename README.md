@@ -3,17 +3,17 @@
 * [Free-Space Length](#free-space-length)
 * [How To Use It](#how-to-use-it)
 * [File Formats](#file-formats)
-  * [Input files](#input-files)
-    * [Particle position "circle" files (*.crcl)](#particle-position-"circle"-files-(*.crcl))
-  * [Output files](#output-files)
-    * [Free-space length data (output.txt)](#free-space-length-data-(output.txt))
-    * [Mode particles file (mode.txt)](#mode-particles-file-(mode.txt))
-    * [Particles per square (distribution.txt)](#particles-per-square-(distribution.txt))
-  * [Intermediate files](#intermediate-files)
-    * [Free-space length box "square" files (*.sqr)](#free-space-length-box-"square"-files-(*.sqr))
-* [Helpful tools](#helpful-tools)
-  * [HistogramVisualizer.py](#histogramvisualizer-py)
-  * [analyzeData.py](#analyzeData.py)
+  * [Input Files](#input-files)
+    <!-- * [Particle position "circle" files (*.crcl)](#particle-position-"circle"-files-(*.crcl)) -->
+  * [Output Files](#output-files)
+    <!-- * [Free-space length data (output.txt)](#free-space-length-data-(output.txt)) -->
+    <!-- * [Mode particles file (mode.txt)](#mode-particles-file-(mode.txt)) -->
+    <!-- * [Particles per square (distribution.txt)](#particles-per-square-(distribution.txt)) -->
+  * [Intermediate Files](#intermediate-files)
+    <!-- * [Free-space length box "square" files (*.sqr)](#free-space-length-box-"square"-files-(*.sqr)) -->
+* [Helpful Tools](#helpful-tools)
+  * [Histogram Viewer](#histogram-viewer)
+  * [Line of Best Fit](#line-of-best-fit)
   * [Visualizer](#visualizer)
 * [Simulator](#simulator)
 * [Current Status](#current-status)
@@ -59,7 +59,7 @@ $ ./SquareCalculator [flags]
 * __`-s`__      indicates that a movie_0.xyz file from a SIMULATOR should be parsed and analyzed. There must be a movie_0.xyz file in the directory. This flag cannot be set with a crystal lattice flag or with the -f flag. The -l and -d flags have no effect with -s. See the [Simulator](#simulator) section below.
 
 ## File Formats
-### Input files
+### Input Files
 #### Particle position "circle" files (*.crcl)
 ```
 [number of particles] [diameter (1.0)] [box size] [volume fraction (can have dummy value)]
@@ -87,7 +87,7 @@ Example:
 
 Here, the image size is around 83.5 particle diameters, so all coordinates are between 0 and that bound. The points are from a TEM scan, and the volume fraction is irrelevant, so that is set to `-1.0`, and opacity is defaulted to `0.99999`.
 
-### Output files
+### Output Files
 #### Free-space length data (output.txt)
 ```
 [box size 1] [free space length 1] [area fraction 1] [volume fraction 1] [depth 1]
@@ -214,7 +214,7 @@ Here, the first example is a histogram taken with a square size greater than the
 
 See `HistogramVisualizer.py` in [Helpful Tools](#helpful-tools) below for a python file that analyzes the output data to find a line of best fit.
 
-### Intermediate files
+### Intermediate Files
 #### Free-space length box "square" files (*.sqr)
 ```
 [number of squares] [box size]
@@ -234,11 +234,13 @@ Example:
 
 Here, there will be 1 square drawn of side length `0.016960` at position `(7.922514, 10.171255)`. The size of the entire image is `10.235511`.
 
-## Helpful tools
-### HistogramVisualizer.py
+## Helpful Tools
+### Histogram Viewer
 TO DO
-### analyzeData.py
+* HistogramVisualizer.py
+### Line Of Best Fit
 TO DO
+* analyzeData.py
 ### Visualizer
 TO DO
 
