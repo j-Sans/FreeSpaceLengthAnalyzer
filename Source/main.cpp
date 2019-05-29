@@ -25,18 +25,18 @@ std::string help =
     (std::string)"Expected: ./SquareCalculator [flags]\n" +
     (std::string)"General flags:\n" +
     (std::string)"-f    * Sets the FILE to be analyzed. Must be followed by a string representing\n\tvalid filepath. This flag cannot be set with a crystal lattice flag or with the\n\t-s flag.\n" +
-    (std::string)"-l    * Sets the LENGTH DECREMENT by which a length will be decremented each\n\titeration. A smaller numbers will get a more precise result but take longer. The\n\tdefault is 0.01. The final result will only be accurate based on the length\n\tdecrement\n" +
+    (std::string)"-l    * Sets the LENGTH DECREMENT by which a length will be decremented each\n\titeration. A smaller numbers will get a more precise result but take longer. The\n\tdefault is 0.01. The final result will only be accurate based on the length\n\tdecrement. This has no effect if the -s flag is set.\n" +
     (std::string)"help  * You seemed to have figured this one out already...\n" +
     (std::string)"Crystal lattice and simulator flags:\n" +
     (std::string)"--sc * Indicates that a SIMPLE CUBIC lattice should be created and analyzed.\n\tThis flagcannot be set with -f or -s.\n" +
     (std::string)"--bcc * Indicates that a BODY CENTERED CUBIC lattice should be created and\n\tanalyzed.This flag cannot be set with -f or -s.\n" +
     (std::string)"--fcc * Indicates that a FACE CENTERED CUBIC lattice should be created and\n\tanalyzed.This flag cannot be set with -f or -s.\n" +
     (std::string)"-v    * Sets the VOLUME FRACTION. Must be followed by a positive double. Note\n\tthat it has no effect if no lattice flag has been set.\n" +
-    (std::string)"-d    * Sets the DEPTH. Must be followed by a positive int. Note that it has no\n\teffect if the -f flag is also set.\n" +
+    (std::string)"-d    * Sets the DEPTH. Must be followed by a positive int. Note that it has no\n\teffect if the -f or -s flag is also set.\n" +
     (std::string)"-m    * Sets the MAX DEPTH and automatically indicates that all depths up to the\n\tmaxdepth should be analyzed. Must be followed by a positive int. Note that it\n\thas no effect if the -f flag is also set.\n" +
     (std::string)"-i    * Indicates that the program ITERATE through all depths by cutting slices\n\tof every depth up to the max depth from the set depth or 1, if no depth was set.\n\tThen it will analyze at each depth. Note that it has no effect if the -f flag is\n\talso set.\n" +
     (std::string)"-a    * Indicates that ALL circle files that are created or parsed will be\n\tanalyzed. Note that it has no effect if the -f flag is also set.\n" +
-    (std::string)"-s    * Indicates that a movie_0.xyz file from a SIMULATOR should be parsed and\n\tanalyzed. There must be a movie_0.xyz file in the directory. This flag cannot be\n\tset with a crystal lattice flag or with the -f flag.\n";
+    (std::string)"-s    * Indicates that a movie_0.xyz file from a SIMULATOR should be parsed and\n\tanalyzed. There must be a movie_0.xyz file in the directory. This flag cannot be\n\tset with a crystal lattice flag or with the -f flag. The -l and -d flags have no\n\teffect with -s. See the README for more details.\n";
 
 void run(int argc, char const* argv[]);
 std::vector<std::string> makeCircleFiles(PackingType p, double volumeFraction, int* maxDepth);
@@ -69,6 +69,17 @@ void run(int argc, char const* argv[]) {
 
     std::string inputtedFilename = "";
 
+    /* Impossible combinations:
+     * -s & -l
+     * -s & -d
+     * --sc / --bcc / --fcc & -f
+     * --sc / --bcc / --fcc & -s
+     * -f & -s
+     * -v & !(--sc / --bcc / --fcc)
+     * -i & -f
+     * -m & -f
+     * -a & -f
+     */
     for (int a = 1; a < argc; a++) {
         std::string arg = std::string(argv[a]);
         // Convert the arg to lower case
@@ -88,6 +99,7 @@ void run(int argc, char const* argv[]) {
             std::cout << "Analyzing face centered cubic" << std::endl;
         } else if (arg == "-d") {
             a += 1;
+            std::cout << "The -d flag has no impact with the -s flag. Use the calcinput file with makecalcinput to specify the depth." << std::endl;
             std::string err = "The -d flag must be followed by an int representing the desired depth.";
             if (a < argc) {
                 try {
@@ -134,6 +146,7 @@ void run(int argc, char const* argv[]) {
         } else if (arg == "-l") {
             a += 1;
             std::string err = "The -l flag must be followed by a double representing the length decrement per iteration.";
+            std::cout << "The -l flag has no effect with the -s flag. Use the calcinput file with makecalcinput to specify the decrement." << std::endl;
             if (a < argc) {
                 try {
                     squareLengthDecrement = std::stod(argv[a]);
@@ -154,9 +167,6 @@ void run(int argc, char const* argv[]) {
             a += 1;
             std::string err = "The -f flag must be followed by a string representing the crcl filename.\n";
             if (a < argc) {
-                if (packing != NoCrystal) {
-                    throw malformed_command("Cannot use a chosen file with the specified packing type.");
-                }
                 inputtedFilename = argv[a];
                 std::cout << "File to analyze set to " << inputtedFilename << std::endl;
             } else {
@@ -164,11 +174,7 @@ void run(int argc, char const* argv[]) {
             }
         } else if (arg == "-s") {
             std::cout << "Parsing, slicing, and analzing 3D simulation file \"movie_0.xyz\"" << std::endl;
-            if (packing != NoCrystal) {
-                throw malformed_command("Cannot use simulator with specified packing type.");
-            } else if (inputtedFilename != "") {
-                throw malformed_command("Cannot use simulator with a specified file.");
-            }
+            std::cout << "Note that the -d and -l flags will have no effect. The depth and decrement are taken from the file calcinput, which can be made with makecalcinput." << std::endl;
             analyzeSimulation = true;
         } else if (arg == "HELP") {
             std::cout << help << std::endl;
@@ -176,6 +182,14 @@ void run(int argc, char const* argv[]) {
         } else {
             std::cout << "Unknown argument " << a << ": " << arg << std::endl;
         }
+    }
+    
+    if (packing != NoCrystal && inputtedFilename != "") {
+        throw malformed_command("Cannot both create a crystal lattice and analyze a separate inputted file.");
+    } else if (packing != NoCrystal && analyzeSimulation) {
+        throw malformed_command("Cannot both create a crystal lattice and use the hard sphere simulator.");
+    } else if (inputtedFilename != "" && analyzeSimulation) {
+        throw malformed_command("Cannot both analyze a separate inputted file and use the hard sphere simulator.");
     }
 
     // Catch all malformed commands that had an incorrect combination of flags
