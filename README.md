@@ -23,18 +23,18 @@ $ ./SquareCalculator [flags]
 
 #### General flags:
 * __`-f`__      sets the FILE to be analyzed. Must be followed by a string representing valid filepath. This flag cannot be set with a crystal lattice flag or with the -s flag.
-* __`-l`__      sets the LENGTH DECREMENT by which a length will be decremented each iteration. A smaller numbers will get a more precise result but take longer. The default is 0.01. The final result will only be accurate based on the length decrement
-* __`help`__    you seemed to have figured this one out already...
+* __`-l`__      sets the LENGTH DECREMENT by which a length will be decremented each iteration. A smaller numbers will get a more precise result but take longer. The default is 0.01. The final result will only be accurate based on the length decrement. This has no effect if the -s flag is set.
+* __`help`__    shows these helpful descriptions.
 #### Crystal lattice and simulator flags:
 * __`--SC`__    indicates that a SIMPLE CUBIC lattice should be created and analyzed. This flag cannot be set with -f or -s.
 * __`--BCC`__   indicates that a BODY CENTERED CUBIC lattice should be created and analyzed. This flag cannot be set with -f or -s.
 * __`--FCC`__   indicates that a FACE CENTERED CUBIC lattice should be created and analyzed. This flag cannot be set with -f or -s.
 * __`-v`__      sets the VOLUME FRACTION. Must be followed by a positive double. Note that it has no effect if no lattice flag has been set.
-* __`-d`__      sets the DEPTH. Must be followed by a positive int. Note that it has no effect if the -f flag is also set.
-* __`-m`__      sets the MAX DEPTH and automatically indicates that all depths up to the maxdepth should be analyzed. Must be followed by a positive int. Note that it has no effect if the -f flag is also set.
+* __`-d`__      sets the DEPTH. Must be followed by a positive int. Note that it has no effect if the -f or -s flag is also set.
+* __`-m`__      sets the MAX DEPTH and automatically indicates that all depths up to the maxdepth should be analyzed. Must be followed by a positive int. Note that it has no effect if the -f flag is also set. Note that some of the .crcl files parsed might be overridden by later .crcl files with higher depths, so although the data will be taken properly, not all of the .crcl files of every depth will be present.
 * __`-i`__      indicates that the program ITERATE through all depths by cutting slices of every depth up to the max depth from the set depth or 1, if no depth was set. Then it will analyze at each depth. Note that it has no effect if the -f flag is also set.
 * __`-a`__      indicates that ALL circle files that are created or parsed will be analyzed. Note that it has no effect if the -f flag is also set.
-* __`-s`__      indicates that a movie_0.xyz file from a SIMULATOR should be parsed and analyzed. There must be a movie_0.xyz file in the directory. This flag cannot be set with a crystal lattice flag or with the -f flag.
+* __`-s`__      indicates that a movie_0.xyz file from a SIMULATOR should be parsed and analyzed. There must be a movie_0.xyz file in the directory. This flag cannot be set with a crystal lattice flag or with the -f flag. The -l and -d flags have no effect with -s. See the [**Simulator**](#simulator) section below.
 
 ## File Formats
 ### Input files
@@ -219,6 +219,15 @@ Add info on:
 * analyzeData.py
 * Visualizer
 
+## Simulator
+The -s flag indicates that a simulated 3D cube of particles will be analyzed. The program will parse a movie_0.xyz file (see below), then cut the resulting cube into slices with a thickness equal to the depth, outputting a .crcl file for each slice (on all 3 axes). Then, each .crcl file is analyzed. movie_0.xyz files can be created using Kai Zhang's [Hard Sphere simulator](https://github.com/statisticalmechanics/hardsphere). 
+
+When the program is being run in this mode, settings can be set using an external file. The file *makecalcinput* can be editted to set the following parameters.
+* framesToIgnore — The number of frmes of the simulation from the movie file to ignore. Because the Hard Sphere simulator begins with the particles in a lattice configuration before they move randomly, ignoring the first few frames, say 10, is necessary to get particles in random 3D positions.
+* framesToRecord — This is the number of frames to parse and slice up. This is typically 1, but especially with very large depths, if a single frame doesn't provide enough samples, then this can be increased.
+* depth — This OVERRIDES a depth provided with the -d flag.
+* squareLengthDecrement — This OVERRIDES a decrement provided with the -l flag.
+
 ## Current Status
 Please note: this README is incomplete. The program needs more testing and this readme needs to be expanded. These are some of the update plans.
 
@@ -227,3 +236,6 @@ Currently, the focus has been on `/Source/`. The other folders can be ignored.
 * Add explanation of movie files to README and link to Kai's work (with permission). Also add calcinput and makecalcinput for when running the program with -s.
 * Add polydispersity to main source folder
 * Figure out about running the visualizer
+
+## Acknowledgements
+This program was made with the help of Kai Zhang for Prof. Sanat Kumar in the Department of Chemical Engineering at Columbia University. It would not have been possible without the assistance and guidance of Kai.
