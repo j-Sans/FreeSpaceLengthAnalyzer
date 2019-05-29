@@ -1,4 +1,8 @@
 # Free-Space Length Analyzer
+Analyzes nanoparticles in polymer matrices to quantify the dispersion and the spacing of the particles.
+
+This program calculates the free space length of a 2D image of particle locations. The program can analyze files of particle locations (-f), or it can simulate and analyze slices of a crystalline lattice of particles (--SC, --BCC, --FCC), or it can parse and analyze a simulation of nanoparticles in 3D (-s).
+
 ## Table of Contents
 * [Free-Space Length](#free-space-length)
 * [How To Use It](#how-to-use-it)
@@ -18,12 +22,6 @@
 * [Simulator](#simulator)
 * [Current Status](#current-status)
 * [Acknowledgements](#acknowledgements)
-
-
-# Free-Space Length Analyzer
-Analyzes nanoparticles in polymer matrices to quantify the dispersion and the spacing of the particles.
-
-This program calculates the free space length of a 2D image of particle locations. The program can analyze files of particle locations (-f), or it can simulate and analyze slices of a crystalline lattice of particles (--SC, --BCC, --FCC), or it can parse and analyze a simulation of nanoparticles in 3D (-s).
 
 ## Free-Space Length
 * TO DO
