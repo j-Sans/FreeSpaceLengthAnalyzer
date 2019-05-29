@@ -1,4 +1,26 @@
 # Free-Space Length Analyzer
+## Table of Contents
+* [Free-Space Length](#free-space-length)
+* [How To Use It](#how-to-use-it)
+* [File Formats](#file-formats)
+  * [Input files](#input-files)
+    * [Particle position "circle" files (*.crcl)](#particle-position-"circle"-files-(*.crcl))
+  * [Output files](#output-files)
+    * [Free-space length data (output.txt)](#free-space-length-data-(output.txt))
+    * [Mode particles file (mode.txt)](#mode-particles-file-(mode.txt))
+    * [Particles per square (distribution.txt)](#particles-per-square-(distribution.txt))
+  * [Intermediate files](#intermediate-files)
+    * [Free-space length box "square" files (*.sqr)](#free-space-length-box-"square"-files-(*.sqr))
+* [Helpful tools](#helpful-tools)
+  * [HistogramVisualizer.py](#histogramvisualizer-py)
+  * [analyzeData.py](#analyzeData.py)
+  * [Visualizer](#visualizer)
+* [Simulator](#simulator)
+* [Current Status](#current-status)
+* [Acknowledgements](#acknowledgements)
+
+
+# Free-Space Length Analyzer
 Analyzes nanoparticles in polymer matrices to quantify the dispersion and the spacing of the particles.
 
 This program calculates the free space length of a 2D image of particle locations. The program can analyze files of particle locations (-f), or it can simulate and analyze slices of a crystalline lattice of particles (--SC, --BCC, --FCC), or it can parse and analyze a simulation of nanoparticles in 3D (-s).
