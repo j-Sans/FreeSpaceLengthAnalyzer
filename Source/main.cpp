@@ -26,6 +26,7 @@ std::string help =
     (std::string)"General flags:\n" +
     (std::string)"-f    * Sets the FILE to be analyzed. Must be followed by a string representing\n\tvalid filepath. This flag cannot be set with a crystal lattice flag or with the\n\t-s flag.\n" +
     (std::string)"-l    * Sets the LENGTH DECREMENT by which a length will be decremented each\n\titeration. A smaller numbers will get a more precise result but take longer. The\n\tdefault is 0.01. The final result will only be accurate based on the length\n\tdecrement. This has no effect if the -s flag is set.\n" +
+    (std::string)"-r    * RENDERS the file in a window.\n" +
     (std::string)"help  * You seemed to have figured this one out already...\n" +
     (std::string)"Crystal lattice and simulator flags:\n" +
     (std::string)"--sc * Indicates that a SIMPLE CUBIC lattice should be created and analyzed.\n\tThis flagcannot be set with -f or -s.\n" +
@@ -41,7 +42,6 @@ std::string help =
 void run(int argc, char const* argv[]);
 std::vector<std::string> makeCircleFiles(PackingType p, double volumeFraction, int* maxDepth);
 std::vector<std::string> parse (int framesToIgnore, int framesToRecord, int* depth, double* volumeFraction, int* maxDepth);
-void processCircles(const std::string& circleFilename, double squareLengthDecrement, double volumeFraction, int depth);
 
 void readInput(int* framesToIgnore, int* framesToRecord, int* depth, double* squareLengthDecrement);
 std::string writeOutput(std::string squareFilename, double areaFraction, double volumeFraction, int depth, std::string outputFilename = "output.txt");
@@ -62,6 +62,7 @@ void run(int argc, char const* argv[]) {
     bool iterateThroughFiles = false;
     bool iterateThroughDepths = false;
     bool analyzeSimulation = false;
+    bool render = false;
 
     // -1 will indicate later if it was not changed
     int framesToIgnore, framesToRecord, depth = -1, maxDepth = std::numeric_limits<int>::max();
@@ -79,6 +80,8 @@ void run(int argc, char const* argv[]) {
      * -i & -f
      * -m & -f
      * -a & -f
+     * -r & -i
+     * -r & -m
      */
     for (int a = 1; a < argc; a++) {
         std::string arg = std::string(argv[a]);
@@ -179,6 +182,9 @@ void run(int argc, char const* argv[]) {
         } else if (arg == "HELP") {
             std::cout << help << std::endl;
             return;
+        } else if (arg == "-r") {
+            std::cout << "Will render files" << std::endl;
+            render = true;
         } else {
             std::cout << "Unknown argument " << a << ": " << arg << std::endl;
         }
@@ -198,6 +204,8 @@ void run(int argc, char const* argv[]) {
         throw malformed_command("No action specified. Use -f, -s, or a crystal packing flag (--SC, --BCC, --FCC) to indicate what to do.");
     } else if (packing != NoCrystal && (volumeFraction <= 0 || volumeFraction >= 1)) {
         throw malformed_command("Invalid volumeFraction. Must be set using the -v flag to a number between 0 and 1.");
+    } else if (render && iterateThroughFiles) {
+        throw malformed_command("Cannot both render and iterate through all files.");
     }
     
     if (analyzeSimulation) {
@@ -230,7 +238,33 @@ void run(int argc, char const* argv[]) {
         do {
             std::string circleFilename = circleFilenames[index];
 
-            processCircles(circleFilename, squareLengthDecrement, volumeFraction, depth);
+            std::cout << "Initializing heuristic" << std::endl;
+            SquareHeuristic algorithm;
+            algorithm.setCircleFile(circleFilename);
+
+            std::cout << "Using circle file: " << circleFilename << std::endl;
+            std::string squareFilename = circleFilename;
+            squareFilename.erase(squareFilename.size() - 4); // Erase "crcl" extension and replace with "sqr"
+            algorithm.setOutputFilename(squareFilename + "sqr");
+
+            std::cout << "Solving for square size" << std::endl;
+
+            Visualizer visualizer(circleFilename, "");
+            visualizer.saveImage();
+
+            squareFilename = algorithm.outputSquares(squareLengthDecrement, 1, 20000, (pow(10.0, -0.399) * pow(visualizer.getAreaFraction(), -0.650)) * 1.25);
+            // squareFilename = algorithm.outputSquares(squareLengthDecrement, 1, 20000, visualizer.getAreaFraction() * 2.0);
+
+            visualizer.setSquareFile(squareFilename);
+
+            std::cout << std::endl << "Area fraction: " << visualizer.getAreaFraction() << std::endl; 
+            std::string outputFilename = writeOutput(squareFilename, visualizer.getAreaFraction(), volumeFraction, depth);
+
+            std::cout << std::endl << "Circle filename: " << circleFilename << std::endl << "Square filename: " << squareFilename << std::endl << "Output filename: " << outputFilename << std::endl;
+
+            while (render && visualizer.isOpen()) {
+                visualizer.render();
+            }
             
             index++;
         } while (iterateThroughFiles && circleFilenames[index] != circleFilenames.back());
@@ -269,30 +303,6 @@ std::vector<std::string> parse(int framesToIgnore, int framesToRecord, int* dept
     std::cout << "Parsing" << std::endl;
 
     return parser.outputCircles();
-}
-
-void processCircles(const std::string& circleFilename, double squareLengthDecrement, double volumeFraction, int depth) {
-    std::cout << "Initializing heuristic" << std::endl;
-    SquareHeuristic algorithm;
-    algorithm.setCircleFile(circleFilename);
-
-    std::cout << "Using circle file: " << circleFilename << std::endl;
-    std::string squareFilename = circleFilename;
-    squareFilename.erase(squareFilename.size() - 4); // Erase "crcl" extension and replace with "sqr"
-    algorithm.setOutputFilename(squareFilename + "sqr");
-    
-    std::cout << "Solving for square size" << std::endl;
-    
-    Visualizer visualizer(circleFilename, "");
-    visualizer.saveImage();
-    
-    squareFilename = algorithm.outputSquares(squareLengthDecrement, 1, 20000, (pow(10.0, -0.399) * pow(visualizer.getAreaFraction(), -0.650)) * 1.25);
-    // squareFilename = algorithm.outputSquares(squareLengthDecrement, 1, 20000, visualizer.getAreaFraction() * 2.0);
-    
-    std::cout << std::endl << "Area fraction: " << visualizer.getAreaFraction() << std::endl; 
-    std::string outputFilename = writeOutput(squareFilename, visualizer.getAreaFraction(), volumeFraction, depth);
-    
-    std::cout << std::endl << "Circle filename: " << circleFilename << std::endl << "Square filename: " << squareFilename << std::endl << "Output filename: " << outputFilename << std::endl;
 }
 
 void readInput(int* framesToIgnore, int* framesToRecord, int* depth, double* squareLengthDecrement) {

@@ -3,7 +3,6 @@
 //  SquareCalculator
 //
 //  Created by Jake Sanders on 6/30/17.
-//  Copyright © 2017 Jake Sanders. All rights reserved.
 //
 
 #include "Visualizer.hpp"
@@ -220,9 +219,9 @@ std::vector<sf::RectangleShape> Visualizer::getSquares(std::string filename) {
             separationPos = str.find_first_of(SEPARATING_CHARACTER);
         }
         
-        double color[3] = {0.0, 0.0, 0.0};
+        double color[3] = {1.0, 0.0, 0.0};
         
-        // Only extract the color if it is there. Otherwise defaults to black
+        // Only extract the color if it is there. Otherwise defaults to red
         if (dataContainsSquareColor) {
             color[0] = std::stod(str.substr(0, separationPos));
             str = str.substr(separationPos + 1);
@@ -239,7 +238,7 @@ std::vector<sf::RectangleShape> Visualizer::getSquares(std::string filename) {
         square.setOutlineThickness(OUTLINE_THICKNESS);
         square.setOutlineColor(sf::Color(color[0] * 255.0, color[1] * 255.0, color[2] * 255.0));
         square.setFillColor(sf::Color::Transparent);
-        
+
         vec.push_back(square);
         
         // Check if circle goes over the edges of the screen. If periodic, draw them on the opposite sides as well

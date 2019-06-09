@@ -21,9 +21,12 @@ Then, move the resulting executible (`SquareCalculator`) to a folder with the fi
 $ ./SquareCalculator [flags]
 ```
 
+For example, 
+
 #### General flags:
 * __`-f`__      sets the FILE to be analyzed. Must be followed by a string representing valid filepath. This flag cannot be set with a crystal lattice flag or with the -s flag.
 * __`-l`__      sets the LENGTH DECREMENT by which a length will be decremented each iteration. A smaller numbers will get a more precise result but take longer. The default is 0.01. The final result will only be accurate based on the length decrement. This has no effect if the -s flag is set.
+* __`-r`__      RENDERS the file in a window.
 * __`help`__    shows these helpful descriptions.
 #### Crystal lattice and simulator flags:
 * __`--SC`__    indicates that a SIMPLE CUBIC lattice should be created and analyzed. This flag cannot be set with -f or -s.
@@ -125,7 +128,7 @@ Here, the first tested side length is `0.807960`, and the size of the box is dec
 
 Note that if the initial box has a mode of 0 particles, the side length is increased until the mode isn't `0`. This ensures that the largest box with a mode of `0` is found, as opposed to an arbitrary one with a mode of `0`.
 
-#### Particles per square (distribution.txt)
+#### Particles per square (distribution_*.txt)
 ```
 [box size] [current side length] [mode with given square length]
 0 [number of boxes with 0 particles]
@@ -190,7 +193,7 @@ Last histogram example:
 
 Here, the first example is a histogram taken with a square size greater than the free-space length. The mode is 6 because more boxes (2736) contain 6 particles than any other number of particles. Because the mode is greater than 0, this is not the free-space length. The second example shows a box size where the square length is the free-space length. That is because there, the mode is 0.
 
-See `HistogramVisualizer.py` in __Helpful Tools__ below for a python file that analyzes the output data to find a line of best fit.
+See `histogramVisualizer.py` in __Helpful Tools__ below for a python file that analyzes the output data to find a line of best fit.
 
 ### Intermediate files
 #### Free-space length box "square" files (*.sqr)
@@ -213,11 +216,39 @@ Example:
 Here, there will be 1 square drawn of side length `0.016960` at position `(7.922514, 10.171255)`. The size of the entire image is `10.235511`.
 
 ## Helpful tools
-TO DO
-Add info on:
-* HistogramVisualizer.py
-* analyzeData.py
-* Visualizer
+#### histogramVisualizer.py
+Run `python histogramVisualizer.py [n]` to view the histogram stored within the file, distribution_*n*.txt.
+
+The *n*th distribution file must exist in the Run directory.
+
+In the window that is opened, the button with a magnifying glass can be used to zoom in on a specific region of the graph, and the home button will reset all zooms and translations.
+
+#### analyzeData.py
+This python script will attempt to find the linear relationship between two variables.
+
+The default is that the free-space length (`Lf`) is graphed as a function of the area concentration (`xf`), using the file `output.txt` (note that using this file means that each run of the program results in only a single data point.). 
+
+`python analyzeData.py` will find `Lf` as a function of `xf` from `output.txt`.
+
+`python analyzeData.py [filename]` will find `Lf` as a function of `xf` from the specified file.
+
+`python analyzeData.py [x] [y]` will find y as a function of x from the `output.txt`.
+
+`python analyzeData.py [filename] [x] [y]` will find y as a function of x from the specified file.
+
+Note that the possibilities for x and y are:
+* `lf`: The free-space length (square size)
+* `xf`: The area fraction
+* `v`: The volume fraction (irrelevant with TEM images)
+* `d`: The depth of each slice (irrelevant with TEM images)
+* anything else: The side length of the box
+
+#### clear
+Run `./clear` to clear the directory. __WARNING: This will remove all `distribution_*.txt`, `mode.txt`, and `*.sqr files`.__
+
+`output.txt` files are not affected. They must be manually removed.
+
+If this can't be run, first run `chmod +x clear` in the directory with `clear`. This turns the file into a script which can be executed.
 
 ## Simulator
 The -s flag indicates that a simulated 3D cube of particles will be analyzed. The program will parse a movie_0.xyz file (see below), then cut the resulting cube into slices with a thickness equal to the depth, outputting a .crcl file for each slice (on all 3 axes). Then, each .crcl file is analyzed. movie_0.xyz files can be created using Kai Zhang's [Hard Sphere simulator](https://github.com/statisticalmechanics/hardsphere). 
@@ -227,15 +258,6 @@ When the program is being run in this mode, settings can be set using an externa
 * framesToRecord — This is the number of frames to parse and slice up. This is typically 1, but especially with very large depths, if a single frame doesn't provide enough samples, then this can be increased.
 * depth — This OVERRIDES a depth provided with the -d flag.
 * squareLengthDecrement — This OVERRIDES a decrement provided with the -l flag.
-
-## Current Status
-Please note: this README is incomplete. The program needs more testing and this readme needs to be expanded. These are some of the update plans.
-
-Currently, the focus has been on `/Source/`. The other folders can be ignored.
-* Add example files to demonstrate the program into the directory, with description in readme
-* Add explanation of movie files to README and link to Kai's work (with permission). Also add calcinput and makecalcinput for when running the program with -s.
-* Add polydispersity to main source folder
-* Figure out about running the visualizer
 
 ## Acknowledgements
 This program was made with the help of Kai Zhang for Prof. Sanat Kumar in the Department of Chemical Engineering at Columbia University. It would not have been possible without the assistance and guidance of Kai.

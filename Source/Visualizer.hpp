@@ -3,7 +3,6 @@
 //  SquareCalculator
 //
 //  Created by Jake Sanders on 6/30/17.
-//  Copyright © 2017 Jake Sanders. All rights reserved.
 //
 
 #ifndef Visualizer_hpp
