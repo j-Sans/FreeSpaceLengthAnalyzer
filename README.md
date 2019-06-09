@@ -3,6 +3,26 @@ Analyzes nanoparticles in polymer matrices to quantify the dispersion and the sp
 
 This program calculates the free space length of a 2D image of particle locations. The program can analyze files of particle locations (-f), or it can simulate and analyze slices of a crystalline lattice of particles (--SC, --BCC, --FCC), or it can parse and analyze a simulation of nanoparticles in 3D (-s).
 
+## Table of Contents
+* [Free-Space Length](#free-space-length)
+* [How To Use It](#how-to-use-it)
+* [File Formats](#file-formats)
+  * [Input Files](#input-files)
+    <!-- * [Particle position "circle" files (*.crcl)](#particle-position-"circle"-files-(*.crcl)) -->
+  * [Output Files](#output-files)
+    <!-- * [Free-space length data (output.txt)](#free-space-length-data-(output.txt)) -->
+    <!-- * [Mode particles file (mode.txt)](#mode-particles-file-(mode.txt)) -->
+    <!-- * [Particles per square (distribution.txt)](#particles-per-square-(distribution.txt)) -->
+  * [Intermediate Files](#intermediate-files)
+    <!-- * [Free-space length box "square" files (*.sqr)](#free-space-length-box-"square"-files-(*.sqr)) -->
+* [Helpful Tools](#helpful-tools)
+  * [Histogram Viewer](#histogram-viewer)
+  * [Line of Best Fit](#line-of-best-fit)
+  * [Visualizer](#visualizer)
+* [Simulator](#simulator)
+* [Current Status](#current-status)
+* [Acknowledgements](#acknowledgements)
+
 ## Free-Space Length
 * TO DO
 * Number of squares tested with per iteration
@@ -37,10 +57,10 @@ For example,
 * __`-m`__      sets the MAX DEPTH and automatically indicates that all depths up to the maxdepth should be analyzed. Must be followed by a positive int. Note that it has no effect if the -f flag is also set. Note that some of the .crcl files parsed might be overridden by later .crcl files with higher depths, so although the data will be taken properly, not all of the .crcl files of every depth will be present.
 * __`-i`__      indicates that the program ITERATE through all depths by cutting slices of every depth up to the max depth from the set depth or 1, if no depth was set. Then it will analyze at each depth. Note that it has no effect if the -f flag is also set.
 * __`-a`__      indicates that ALL circle files that are created or parsed will be analyzed. Note that it has no effect if the -f flag is also set.
-* __`-s`__      indicates that a movie_0.xyz file from a SIMULATOR should be parsed and analyzed. There must be a movie_0.xyz file in the directory. This flag cannot be set with a crystal lattice flag or with the -f flag. The -l and -d flags have no effect with -s. See the [**Simulator**](#simulator) section below.
+* __`-s`__      indicates that a movie_0.xyz file from a SIMULATOR should be parsed and analyzed. There must be a movie_0.xyz file in the directory. This flag cannot be set with a crystal lattice flag or with the -f flag. The -l and -d flags have no effect with -s. See the [Simulator](#simulator) section below.
 
 ## File Formats
-### Input files
+### Input Files
 #### Particle position "circle" files (*.crcl)
 ```
 [number of particles] [diameter (1.0)] [box size] [volume fraction (can have dummy value)]
@@ -68,7 +88,7 @@ Example:
 
 Here, the image size is around 83.5 particle diameters, so all coordinates are between 0 and that bound. The points are from a TEM scan, and the volume fraction is irrelevant, so that is set to `-1.0`, and opacity is defaulted to `0.99999`.
 
-### Output files
+### Output Files
 #### Free-space length data (output.txt)
 ```
 [box size 1] [free space length 1] [area fraction 1] [volume fraction 1] [depth 1]
@@ -98,7 +118,7 @@ Example:
 
 Here, 12 samples give the free-space length (in units of particle diameters) based on given particle configurations. There are two sets of 6 trials, where each set has a specific volume concentration with simulated particles. Each trial is a slice of a 3D image of the simulated particles. The depth was held constant.
 
-See `analyzeData.py` in __Helpful Tools__ below for a python file that analyzes the output data to find a line of best fit.
+See `analyzeData.py` in [Helpful Tools](#helpful-tools) below for a python file that analyzes the output data to find a line of best fit.
 
 #### Mode particles file (mode.txt)
 ```
@@ -193,9 +213,9 @@ Last histogram example:
 
 Here, the first example is a histogram taken with a square size greater than the free-space length. The mode is 6 because more boxes (2736) contain 6 particles than any other number of particles. Because the mode is greater than 0, this is not the free-space length. The second example shows a box size where the square length is the free-space length. That is because there, the mode is 0.
 
-See `histogramVisualizer.py` in __Helpful Tools__ below for a python file that analyzes the output data to find a line of best fit.
+See `HistogramVisualizer.py` in [Helpful Tools](#helpful-tools) below for a python file that analyzes the output data to find a line of best fit.
 
-### Intermediate files
+### Intermediate Files
 #### Free-space length box "square" files (*.sqr)
 ```
 [number of squares] [box size]
@@ -251,7 +271,7 @@ Run `./clear` to clear the directory. __WARNING: This will remove all `distribut
 If this can't be run, first run `chmod +x clear` in the directory with `clear`. This turns the file into a script which can be executed.
 
 ## Simulator
-The -s flag indicates that a simulated 3D cube of particles will be analyzed. The program will parse a movie_0.xyz file (see below), then cut the resulting cube into slices with a thickness equal to the depth, outputting a .crcl file for each slice (on all 3 axes). Then, each .crcl file is analyzed. movie_0.xyz files can be created using Kai Zhang's [Hard Sphere simulator](https://github.com/statisticalmechanics/hardsphere). 
+The -s flag indicates that a simulated 3D cube of particles will be analyzed. The program will parse a movie_0.xyz file (see below), then cut the resulting cube into slices with a thickness equal to the depth, outputting a .crcl file for each slice (on all 3 axes). Then, each .crcl file is analyzed. movie_0.xyz files can be created using [Kai Zhang](https://github.com/statisticalmechanics)'s [Hard Sphere simulator](https://github.com/statisticalmechanics/hardsphere). 
 
 When the program is being run in this mode, settings can be set using an external file. The file *makecalcinput* can be editted to set the following parameters.
 * framesToIgnore — The number of frmes of the simulation from the movie file to ignore. Because the Hard Sphere simulator begins with the particles in a lattice configuration before they move randomly, ignoring the first few frames, say 10, is necessary to get particles in random 3D positions.
@@ -260,4 +280,4 @@ When the program is being run in this mode, settings can be set using an externa
 * squareLengthDecrement — This OVERRIDES a decrement provided with the -l flag.
 
 ## Acknowledgements
-This program was made with the help of Kai Zhang for Prof. Sanat Kumar in the Department of Chemical Engineering at Columbia University. It would not have been possible without the assistance and guidance of Kai.
+This program was made with the help of [Kai Zhang](https://github.com/statisticalmechanics) for Prof. Sanat Kumar in the Department of Chemical Engineering at Columbia University. It would not have been possible without the assistance and guidance of Kai.
