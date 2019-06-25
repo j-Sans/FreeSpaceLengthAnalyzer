@@ -24,9 +24,13 @@ This program calculates the free space length of a 2D image of particle location
 * [Acknowledgements](#acknowledgements)
 
 ## Free-Space Length
-* TO DO
-* Number of squares tested with per iteration
-* Explain the "wrapping" functionality of boxes on one side wrapping to the other side.
+Nanoparticles are often added into polymer matrices in order to provide increased strength and toughness; however, the reinforcement they provide is highly dependant on how dispersed they are. Ideally they would be uniformally dispersed in a crystal lattice, although in practice random dispersion or agglomerated clumps is more realistic. These clumps that can form are less helpful to the polymer, and can in fact even weaken the material. Because of the major impact of the dispersion, a method of quantifying it is important. With a 3D sample, tactics such as X-ray scattering can help to figure out the dispersion, but in addition to having high complexities, they can be logistically difficult because they require the physical 3D sample. The Free-Space Length provides an alternate method of quantifying the dispersion solely based on a 2D TEM image.
+
+The Free-Space Length, or Lf, is calculated typically as a function of the area concentration, or xf, in the image. This is the fraction of the area that is covered by particle. Lf is calculated by first starting with a square size L. A square with this side length is placed onto the image, and the number of particles contained is counted. This is repeated a statistically significant number of times, in this case 20,000 times, to find the most likely number of particles contained in a square of that size (the mode number of particles). L is then decreased, and this process repeated, until the mode is 0. The side length of the largest square containing a mode of 0 particles is called the free-space length Lf. If this square is randomly placed onto the image, it is more likely going to contain 0 particles than any other number of particles.
+
+A larger Lf means that there is more spacing between particles. With a constant xf, a larger Lf indicates that particles are less well dispersed, because there are significant empty regions with no particles. Note that in this experiment, if a square was placed such that it crosses the edge of the image, the region outside the image "wraps around" to the opposite side of the image.
+
+This method was proposed in [this](https://www.sciencedirect.com/science/article/pii/S0032386109011124) paper, and was further analyzed by [Kai Zhang](https://github.com/statisticalmechanics), me, and others. When available, the results will be linked here.
 
 ## How To Use It
 First, to compile it, the SFML library is required. It can be downloaded from [this website](https://www.sfml-dev.org/index.php).
