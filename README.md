@@ -285,3 +285,4 @@ When the program is being run in this mode, settings can be set using an externa
 
 ## Acknowledgements
 This program was made with the help of [Kai Zhang](https://github.com/statisticalmechanics) for Prof. Sanat Kumar in the Department of Chemical Engineering at Columbia University. It would not have been possible without the assistance and guidance of Kai.
+# Salt
